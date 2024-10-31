@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  eliza:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: eliza
+    ports:
+      - "${PORT:-3000}:${PORT:-3000}"  # Use env variable with fallback
+    environment:
+      # Server Configuration
+      - NODE_ENV=production
+      - PORT=${PORT:-3000}
+      - HOST=${HOST:-0.0.0.0}
+      - CHARACTERS_PATH=${CHARACTERS_PATH:-characters/degenspartan.json}
+      
+      # OpenAI Configuration
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      
+      # Optional Integrations
+      - DISCORD_APPLICATION_ID=${DISCORD_APPLICATION_ID}
+      - DISCORD_API_TOKEN=${DISCORD_API_TOKEN}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      
+      # ElevenLabs Configuration
+      - ELEVENLABS_XI_API_KEY=${ELEVENLABS_XI_API_KEY}
+      - ELEVENLABS_MODEL_ID=${ELEVENLABS_MODEL_ID:-eleven_multilingual_v2}
+      - ELEVENLABS_VOICE_ID=${ELEVENLABS_VOICE_ID}
+      - ELEVENLABS_VOICE_STABILITY=${ELEVENLABS_VOICE_STABILITY:-0.5}
+      - ELEVENLABS_VOICE_SIMILARITY_BOOST=${ELEVENLABS_VOICE_SIMILARITY_BOOST:-0.9}
+      
+      # Twitter Configuration
+      - TWITTER_DRY_RUN=${TWITTER_DRY_RUN:-false}
+      - TWITTER_USERNAME=${TWITTER_USERNAME}
+      - TWITTER_PASSWORD=${TWITTER_PASSWORD}
+      - TWITTER_EMAIL=${TWITTER_EMAIL}
+      - TWITTER_COOKIES=${TWITTER_COOKIES}
+      
+      # Blockchain Configuration
+      - WALLET_SECRET_KEY=${WALLET_SECRET_KEY}
+      - WALLET_PUBLIC_KEY=${WALLET_PUBLIC_KEY}
+      - BIRDEYE_API_KEY=${BIRDEYE_API_KEY}
+      - SOL_ADDRESS=${SOL_ADDRESS}
+      - SLIPPAGE=${SLIPPAGE:-1}
+      - RPC_URL=${RPC_URL:-https://api.mainnet-beta.solana.com}
+      - HELIUS_API_KEY=${HELIUS_API_KEY}
+    volumes:
+      - ./characters:/app/characters  # Mount characters directory
+      - ./db.sqlite:/app/db.sqlite    # Persist database
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "if (!process.env.OPENAI_API_KEY) throw new Error('OPENAI_API_KEY required')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+networks:
+  default:
+    name: eliza-network

@@ -203,9 +203,9 @@ this.app.post("/:agentId/whisper", upload.single('file'), async (req: CustomRequ
     this.agents.delete(agent.agentId);
   }
 
-  public start(port: number) {
-    this.app.listen(port, () => {
-      console.log(`Server running at http://localhost:${port}/`);
+  public start(port: number, host: string = '0.0.0.0') {
+    this.app.listen(port, host, () => {
+      console.log(`Server running at http://${host}:${port}/`);
     });
   }
 }

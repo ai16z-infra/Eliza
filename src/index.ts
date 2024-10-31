@@ -25,14 +25,17 @@ import { TwitterGenerationClient } from "./clients/twitter/generate.ts";
 interface Arguments {
   character?: string;
   characters?: string;
-  //twitter?: boolean;
   discord?: boolean;
-  telegram?: boolean; // Added telegram option
+  telegram?: boolean;
+  port?: number;
+  host?: string;
 }
 
 let argv: Arguments = {
   character: "./src/agent/default_character.json",
   characters: "",
+  port: 3000,
+  host: "0.0.0.0",
 };
 
 try {
@@ -50,6 +53,16 @@ try {
       type: "boolean",
       description: "Enable Telegram client",
       default: false,
+    })
+    .option("port", {
+      type: "number",
+      description: "Port to run the server on",
+      default: 3000,
+    })
+    .option("host", {
+      type: "string",
+      description: "Host to run the server on",
+      default: "0.0.0.0",
     })
     .parseSync() as Arguments;
 } catch (error) {
@@ -69,7 +82,7 @@ console.log("characterPaths", characterPaths);
 const characters = [];
 
 const directClient = new DirectClient();
-directClient.start(3000);
+directClient.start(argv.port, argv.host);
 
 if (characterPaths?.length > 0) {
   for (const path of characterPaths) {
@@ -244,8 +257,8 @@ function chat() {
       return;
     }
 
-    const agentId = characters[0].name.toLowerCase(); // Assuming we're using the first character
-    const response = await fetch(`http://localhost:3000/${agentId}/message`, {
+    const agentId = characters[0].name.toLowerCase();
+    const response = await fetch(`http://${argv.host}:${argv.port}/${agentId}/message`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
